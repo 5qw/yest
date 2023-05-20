@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client, Collection, GatewayIntentBits, Intents, Presence } = require('discord.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 
 /////////////////////COMMANDS HANDLER
@@ -75,7 +75,7 @@ monitor.on('error', (error) => {
 });
 
 function sendWebhookMessage(title, message) {
-  const webhookURL = 'https://discord.com/api/webhooks/1109447246593929246/TYvjbcQ1Qwb4zyoKwuaGFCvGkgaEJwHjIuIpK4ueqsxBPzxPHfgQyYti7T10QYo-_jIh'; // Replace with your actual webhook URL
+  const webhookURL = 'https://discord.com/api/webhooks/1109542723729506346/JC9CwUHssYYQUTozg21v8UZjvbOXAz9P1n019t-mzmTq8Rr2GMQf2-l_dKahzi2XaT8H'; // Replace with your actual webhook URL
 
   axios.post(webhookURL, { content: message, username: title })
     .then(() => console.log('[📢] Webhook sent successfully.'))

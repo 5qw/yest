@@ -7,12 +7,21 @@ module.exports = {
     .setDescription('Sends a random cat image.'),
   async execute(interaction) {
     try {
-      const response = await axios.get('https://api.thecatapi.com/v1/images/search');
-      const imageUrl = response.data[0].url;
-      await interaction.reply(imageUrl);
+      //const catImageResponse = await axios.get('https://api.thecatapi.com/v1/images/search');
+      //const imageUrl = catImageResponse.data[0].url;
+      const response = await axios.get('https://cataas.com/cat?json=true');
+      const imageUrl = `https://cataas.com${response.data.url}`;
+
+
+      const catEmoji = '😺';
+
+      const catFactResponse = await axios.get('https://cat-fact.herokuapp.com/facts/random');
+      const catFact = catFactResponse.data.text;
+
+      await interaction.reply(`${catFact} ${catEmoji}\n${imageUrl}`);
     } catch (error) {
       console.error(error);
-      await interaction.reply('Failed to fetch a random cat image.');
+      await interaction.reply('Failed to fetch a random cat image and fact.');
     }
   },
 };
