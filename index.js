@@ -1,47 +1,47 @@
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GatewayIntentBits, Intents, Presence } = require('discord.js');
+const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+const client = new Client({ 
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+});
 
-
-/////////////////////COMMANDS HANDLER
+///////////////////// COMMANDS HANDLER
 
 client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-		}
-	}
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const command = require(filePath);
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+        }
+    }
 }
 
-
-/////////////////////////EVENTS HANDLER
+///////////////////////// EVENTS HANDLER
 
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
 for (const file of eventFiles) {
-	const filePath = path.join(eventsPath, file);
-	const event = require(filePath);
-	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
-	} else {
-		client.on(event.name, (...args) => event.execute(...args));
-	}
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args, client));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args, client));
+    }
 }
 
-///////////////////////////MONITOR
+/////////////////////////// MONITOR
 
 const keepAlive = require('./server');
 const Monitor = require('ping-monitor');
@@ -55,47 +55,46 @@ const monitor = new Monitor({
 });
 
 monitor.on('up', (res) => {
-  console.log(`   - ${res.website} is up.`);
-  sendWebhookMessage('[🟢] Monitor is up', res.website);
+    console.log(`   - ${res.website} is up.`);
+    sendWebhookMessage('[🟢] Monitor is up', res.website);
 });
 
 monitor.on('down', (res) => {
-  console.log(`${res.website} has died - ${res.statusMessage}`);
-  sendWebhookMessage('[🔴] Monitor is down', res.website);
+    console.log(`${res.website} has died - ${res.statusMessage}`);
+    sendWebhookMessage('[🔴] Monitor is down', res.website);
 });
 
 monitor.on('stop', (website) => {
-  console.log(`[🟠] ${website} has stopped.`);
-  sendWebhookMessage('Monitor has stopped', website);
+    console.log(`[🟠] ${website} has stopped.`);
+    sendWebhookMessage('Monitor has stopped', website);
 });
 
 monitor.on('error', (error) => {
-  console.log(error);
-  sendWebhookMessage('[🚨] Monitor error', error);
+    console.log(error);
+    sendWebhookMessage('[🚨] Monitor error', error);
 });
 
 function sendWebhookMessage(title, message) {
-  const webhookURL = 'https://discord.com/api/webhooks/1109542723729506346/JC9CwUHssYYQUTozg21v8UZjvbOXAz9P1n019t-mzmTq8Rr2GMQf2-l_dKahzi2XaT8H'; // Replace with your actual webhook URL
+    const webhookURL = 'https://discord.com/api/webhooks/1109542723729506346/JC9CwUHssYYQUTozg21v8UZjvbOXAz9P1n019t-mzmTq8Rr2GMQf2-l_dKahzi2XaT8H'; // Replace with your actual webhook URL
 
-  axios.post(webhookURL, { content: message, username: title })
-    .then(() => console.log('[📢] Webhook sent successfully.'))
-    .catch((error) => console.error('[⚠] Error sending webhook:', error));
+    axios.post(webhookURL, { content: message, username: title })
+        .then(() => console.log('[📢] Webhook sent successfully.'))
+        .catch((error) => console.error('[⚠] Error sending webhook:', error));
 }
 
-///////////////////////DEPLOY COMMANDS
+/////////////////////// DEPLOY COMMANDS
 
 const { exec } = require('child_process');
 
 exec('node deploy-commands.js', (error, stdout, stderr) => {
-  if (error) {
-    console.error('Error executing deploy-commands.js:', error);
-    return;
-  }
-  console.log('[📢] Updating all commands...');
-  console.log(stdout);
+    if (error) {
+        console.error('[⚠] Error executing deploy-commands.js:', error);
+        return;
+    }
+    console.log('[📢] Updating all commands...');
+    console.log(stdout);
 });
 
-
-///////////////////////LOGIN
+/////////////////////// LOGIN
 
 client.login(process.env.token);

@@ -5,18 +5,12 @@ module.exports = {
         .setName('uptime')
         .setDescription('Displays the uptime of the bot'),
     async execute(interaction) {
-        // Get the uptime of the Node.js process
         const uptime = process.uptime();
-
-        // Format the uptime into a human-readable string excluding zero values
         const formattedUptime = formatUptime(uptime);
-
-        // Reply with the uptime
         await interaction.reply(`⏳» Time since last reboot: ${formattedUptime}`);
     },
 };
 
-// Helper function to format the uptime into a human-readable string excluding zero values
 function formatUptime(uptime) {
     const seconds = Math.floor(uptime % 60);
     const minutes = Math.floor((uptime / 60) % 60);
