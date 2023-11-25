@@ -8,7 +8,7 @@ module.exports = {
   async execute(interaction) {
     try {
       const response = await axios.get('https://cataas.com/cat?json=true');
-      const imageUrl = `https://cataas.com${response.data.url}`;
+      const imageUrl = `https://cataas.com${response.data._id}`;
 
       const catEmoji = '😺';
 
@@ -38,7 +38,7 @@ module.exports = {
       collector.on('collect', async (i) => {
         try {
           const newResponse = await axios.get('https://cataas.com/cat?json=true');
-          const newImageUrl = `https://cataas.com${newResponse.data.url}`;
+          const newImageUrl = `https://cataas.com${response.data._id}`;
 
           embed.setImage(newImageUrl);
 
